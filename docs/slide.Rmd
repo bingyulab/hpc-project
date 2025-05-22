@@ -486,6 +486,103 @@ class: title-slide
 ]
 
 ---
+## Configuration I -- Parameters
+```python
+num_warmup_iters = 10
+num_iters = 1000
+device_buffers = 'cpu'
+kind = 'one-sided'
+test_type = parameter([
+    ('osu_get_latency', 'latency'),
+    ('osu_get_bw', 'bandwidth')
+])
+
+# Define message sizes
+latency_size = 8192     # 8K bytes
+bandwidth_size = 1048576  # 1MB
+
+time_limit = '10m'
+exclusive = True
+
+# Add parameter for binary source
+binary_source = parameter(['local', 'easybuild', 'eessi'])
+```
+
+---
+## Configuration II -- Benchmark
+```python
+@run_before('setup')
+def setup_per_benchmark(self):
+    """Setup benchmark-specific parameters"""
+    self.benchmark, self.metric = self.test_type
+    
+    # Determine unit based on metric
+    if self.metric == 'latency':
+        self.test_size = self.latency_size
+        self.unit = 'us'
+    else:  # bandwidth
+        self.test_size = self.bandwidth_size
+        self.unit = 'MB/s'
+        
+    # Set up the performance variable with our custom function
+    self.perf_variables = {
+        self.metric: sn.make_performance_function(
+            self._extract_metric(self.test_size), self.unit
+        )
+    }     
+def _extract_metric(self, size):
+    """Extract benchmark metric from stdout with specific size"""
+    return sn.extractsingle(rf'^{size}\s+(\S+)',
+                            self.stdout, 1, float)
+```
+---
+## Configuration III -- Modules
+```python
+@run_before('run')
+def load_modules(self):
+    """Load necessary modules based on binary source"""
+    self.modules = []      
+    self.prerun_cmds.extend(MODULE_CONFIGS[self.binary_source])
+            
+@run_before('run')    
+def set_executable(self):
+    if self.binary_source == 'local':
+        osu_dir = os.path.expanduser('~/osu-micro-benchmarks-7.2/build')
+        self.executable = os.path.join(
+            osu_dir, 'libexec/osu-micro-benchmarks/mpi', 
+            self.kind, self.benchmark)
+    elif self.binary_source in ['easybuild', 'eessi']:
+        self.executable = "${EBROOTOSUMINMICROMINBENCHMARKS}/libexec/osu-micro-benchmarks/mpi/${KIND}/${BENCHMARK}"
+        self.prerun_cmds.extend([
+            'export KIND="' + self.kind + '"',
+            'export BENCHMARK="' + self.benchmark + '"',
+            'if [ -z "$EBROOTOSUMINMICROMINBENCHMARKS" ]; then',
+            '  echo "Warning: EBROOTOSUMINMICROMINBENCHMARKS not set, trying to find it..."',
+            '  OSU_PATH=$(find /opt -name "osu_get_latency" -type f -executable 2>/dev/null | head -1)',
+            '  if [ -n "$OSU_PATH" ]; then',
+            '    export EBROOTOSUMINMICROMINBENCHMARKS=$(dirname $(dirname $(dirname $(dirname $OSU_PATH))))',
+            '    echo "Found at: $EBROOTOSUMINMICROMINBENCHMARKS"',
+            '  else',
+            '    echo "Could not find OSU Micro-Benchmarks"',
+            '    exit 1',
+            '  fi',
+            'fi',
+            'echo "Using OSU benchmarks from: $EBROOTOSUMINMICROMINBENCHMARKS"'
+        ])
+    else:
+        self.skip_if(True, 'Unknown binary source')
+        return
+    self.executable_opts = [
+        '-m', str(self.test_size),
+        '-x', str(self.num_warmup_iters),
+        '-i', str(self.num_iters)
+    ]
+    self.prerun_cmds.append(
+        f'if [ ! -x "{self.executable}" ]; then '
+        f'echo "Benchmark executable not found: {self.executable}"; exit 1; fi'
+    )
+```
+___
 
 # ReFrame Configuration Hierarchy
 
@@ -642,10 +739,10 @@ source $(dirname $0)/binding_vars.sh
 # Apply binding based on task ID
 if [ "$SLURM_PROCID" = "0" ]; then
     echo "Task 0: Binding to NUMA node $NUMA_DIFF_SAME_SOCKET_1"
-    numactl --cpunodebind=$NUMA_DIFF_SAME_SOCKET_1 --membind=$NUMA_DIFF_SAME_SOCKET_1 "$@"
+    numactl --cpunodebind=$NUMA_DIFF_SAME_SOCKET_1 "$@"
 else
     echo "Task 1: Binding to NUMA node $NUMA_DIFF_SAME_SOCKET_2"
-    numactl --cpunodebind=$NUMA_DIFF_SAME_SOCKET_2 --membind=$NUMA_DIFF_SAME_SOCKET_2 "$@"
+    numactl --cpunodebind=$NUMA_DIFF_SAME_SOCKET_2 "$@"
 fi      
 ```
 
@@ -701,10 +798,10 @@ source $(dirname $0)/binding_vars.sh
 # Apply binding based on task ID
 if [ "$SLURM_PROCID" = "0" ]; then
     echo "Task 0: Binding to NUMA node $NUMA_DIFF_SOCKET_1"
-    numactl --cpunodebind=$NUMA_DIFF_SOCKET_1 --membind=$NUMA_DIFF_SOCKET_1 "$@"
+    numactl --cpunodebind=$NUMA_DIFF_SOCKET_1 "$@"
 else
     echo "Task 1: Binding to NUMA node $NUMA_DIFF_SOCKET_2"
-    numactl --cpunodebind=$NUMA_DIFF_SOCKET_2 --membind=$NUMA_DIFF_SOCKET_2 "$@"
+    numactl --cpunodebind=$NUMA_DIFF_SOCKET_2 "$@"
 fi            
 ```
 ---

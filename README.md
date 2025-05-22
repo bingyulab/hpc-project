@@ -39,6 +39,11 @@ This suite measures MPI performance across four key communication scenarios:
 
 ## 📦 **Installation**
 
+Connect to HPC server:
+```bash
+salloc -N 2 -n 2 --exclusive 
+```
+
 Install OSU Micro-Benchmarks using one of these methods:
 
 ```bash
@@ -69,30 +74,14 @@ cd scripts
 
 ```bash
 cd scripts
-./3.latency_bw_test_manually.sh
+./3.Tests.sh
 ```
-⚠️ **Warning 1 :** Before executing this script, please ensure you have exclusive allocation of two full nodes to enable all four placement types.
+Note, there are some bugs of python does not successfully load environmental vairable. I have not fixed yet. 
 
-✅ Full procedure can be 
-
+Or, simply run
 ```bash
-salloc -p interactive --qos debug -N 2 -n 2 --exclusive 
-
-cd ..*/scripts
-
-# Local installation
-./1.Install-OSU-Micro-Benchmarks.sh --method local
-
-# Source the generated environment file
-source /tmp/osu_env_*.sh
-
-./3.latency_bw_test_manually.sh
+./run-test.sh
 ```
-
- ⚠️ **Warning 2 :** For the **IRIS** cluster, to ensure all four placement types in the right place, you need to modify the map_cpu: binding options according to the **IRIS**cluster topology. 
-
- 📄 Output: Results will be saved in the following directory: `/hpc-project/log/`
-
 ### Running Tests with ReFrame
 
 Execute the complete test suite:

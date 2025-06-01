@@ -1,7 +1,7 @@
 ---
 title: "MPI Communication Pattern Testing"
 subtitle: "Benchmarking Network Performance in HPC Environments"
-author: "Jahid & Bingyu"
+author: "Bingyu"
 date: "`r Sys.Date()`"
 output: 
   xaringan::moon_reader:
@@ -407,55 +407,6 @@ srun -N 2 -n 2 -c 1 --cpu-bind=cores osu_get_latency
 <!-- .center[<img src="imgs/diff_node_manually_verification.jpeg" alt ="Case 4: Different Node", height="500px">] -->
 ---
 
-
-class: title-slide
-
-# Manual placement result Analysis
-
----
-### Manual Test Results Overview : Observations 1 
-.pull-left[
-
-![Comparison of OSU Performance](imgs/cluster_performance_manual.png)
-
-]
-
-.pull-right[
-### Key Findings
-- **AION** outperforms **IRIS** in both bandwidth(intra-node) and latency tests
-  
-- **AION** Bandwidth achieved 8000 +/- MB's for intra node
-  
-- **IRIS** Bandwidth achieved 4000 +/- MB's for intra node
-  
-- **Cross-node** communication shows expected higher latency for both clusters, around 12000 +/- MB's
-]
-
----
-### Manual Test Results Overview : Observations 2 
-.pull-left[
-
-![Comparison of OSU Performance](imgs/cluster_performance_manual_case2.png)
-
-]
-
-.pull-right[
-### Key Findings
-- Most of times **Local** installation leads to low bandwidth for Inter-node communication in both of clusters **AION** **IRIS** .
-- Need to find out the cases ???
-- 
-]
-
-
----
-### Bandwidth overview in detail
-
-<div style="text-align: center;">
-  <img src="imgs/bandwidth-aion-iris-local.png" style="width:90%;" />
-  <p><em>Figure: Comparison of bandwidth performance across Aion and Iris with local placement.</em></p>
-</div>
-
----
 
 class: title-slide
 

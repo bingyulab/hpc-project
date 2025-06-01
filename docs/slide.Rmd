@@ -356,25 +356,17 @@ class: title-slide
 - Lowest expected latency, highest bandwidth
   
 ```{bash, echo=TRUE, eval=FALSE}
-srun -N 1 -n 2 --cpu-bind=map_cpu:0,4 osu_get_latency
 ```
 
-- Task 0 on : CPU(s) 0, Socket 0, NUMA node 0
-- Task 1 on : CPU(s) 4, Socket 0, NUMA node 0
-  
 # Test Case 2: Cross-NUMA, Same Socket
 
 - Communication across NUMA boundaries
 - Memory controller traversal overhead
    
 ```{bash, echo=TRUE, eval=FALSE}
-srun srun -N 1 -n 2 --cpu-bind=map_cpu:0,16 osu_get_latency
 ```
 
-- Task 1 on : CPU(s) 16, Socket 0, NUMA node 1
-- Task 0 on : CPU(s) 0, Socket 0, NUMA node 0
-
-<!-- .center[<img src="imgs/diff_numa_manually_verification.jpeg" alt ="Case 2: Different NUMA", height="500px">] -->
+.center[<img src="imgs/diff_numa_manually_verification.jpeg" alt ="Case 2: Different NUMA", height="500px">]
 
 ---
 
@@ -384,11 +376,8 @@ srun srun -N 1 -n 2 --cpu-bind=map_cpu:0,16 osu_get_latency
 - Higher latency due to QPI/UPI interconnect
   
 ```{bash, echo=TRUE, eval=FALSE}
-srun -N 1 -n 2 --cpu-bind=map_cpu:0,64 osu_get_latency
 ```
-- Task 0 on : CPU(s) 0, Socket 0, NUMA node 0
-- Task 1 on : CPU(s) 64, Socket 1, NUMA node 4
-<!-- .center[<img src="imgs/diff_socket_manually_verification.jpeg" alt ="Case 3: Different Socket", height="500px">] -->
+.center[<img src="imgs/diff_socket_manually_verification.jpeg" alt ="Case 3: Different Socket", height="500px">]
 
 <!-- --- -->
 
@@ -398,13 +387,9 @@ srun -N 1 -n 2 --cpu-bind=map_cpu:0,64 osu_get_latency
 - Higher latency, Higher bandwidth.
 
 ```{bash, echo=TRUE, eval=FALSE}
-srun -N 2 -n 2 -c 1 --cpu-bind=cores osu_get_latency
 ```
 
-- Task 1 on Node **cluster - ## :** CPU(s) 0, Socket 0, NUMA node 0
-- Task 0 on Node **cluster - @@ :** CPU(s) 0, Socket 0, NUMA node 0
-  
-<!-- .center[<img src="imgs/diff_node_manually_verification.jpeg" alt ="Case 4: Different Node", height="500px">] -->
+.center[<img src="imgs/diff_node_manually_verification.jpeg" alt ="Case 4: Different Node", height="500px">]
 ---
 
 

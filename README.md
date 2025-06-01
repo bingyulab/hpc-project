@@ -95,3 +95,9 @@ This will automatically run all benchmark tests and generate performance reports
 ## 📊 **Results**
 
 Test results are stored in the ReFrame output directory and can be used to track performance trends over time.
+
+## 👥 **Author and Contributions**
+
+This project was developed as part of a group coursework in High-Performance Computing (HPC). 
+
+The manual testing components were contributed by team members but have been temporarily removed. Future updates may include a reimplementation of these components.
